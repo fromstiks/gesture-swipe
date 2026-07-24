@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:paddingBottom="8dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Листай ленту жестом руки, не касаясь экрана. Выполни 3 шага по порядку."
+            android:paddingBottom="24dp" />
+
+        <TextView
+            android:id="@+id/statusCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_camera_off"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/statusA11y"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_a11y_off"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/statusService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/status_service_off"
+            android:paddingBottom="24dp" />
+
+        <Button
+            android:id="@+id/btnGrantCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_grant_camera"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnOpenA11y"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_open_a11y"
+            android:layout_marginBottom="12dp" />
+
+        <Button
+            android:id="@+id/btnToggleService"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_start" />
+
+    </LinearLayout>
+</ScrollView>

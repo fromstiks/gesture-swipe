@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">GestureSwipe</string>
+    <string name="accessibility_description">Позволяет приложению эмулировать свайпы вверх/вниз, когда сработал жест рукой (например, для листания ленты без касания экрана).</string>
+
+    <string name="status_camera_off">Камера: нет разрешения</string>
+    <string name="status_camera_on">Камера: разрешение выдано</string>
+    <string name="status_a11y_off">Служба свайпов: выключена</string>
+    <string name="status_a11y_on">Служба свайпов: включена</string>
+    <string name="status_service_off">Распознавание: остановлено</string>
+    <string name="status_service_on">Распознавание: работает</string>
+
+    <string name="btn_grant_camera">1. Дать доступ к камере</string>
+    <string name="btn_open_a11y">2. Включить службу свайпов</string>
+    <string name="btn_start">3. Запустить распознавание</string>
+    <string name="btn_stop">Остановить распознавание</string>
+
+    <string name="notif_channel_name">Распознавание жестов</string>
+    <string name="notif_title">GestureSwipe работает</string>
+    <string name="notif_text">Помашите рукой вверх/вниз перед камерой, чтобы листать.</string>
+</resources>

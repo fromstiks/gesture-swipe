@@ -1,0 +1,12 @@
+СЮДА НУЖНО ПОЛОЖИТЬ ФАЙЛ МОДЕЛИ MediaPipe.
+
+Имя файла ровно: hand_landmarker.task
+
+Скачать (примерно 7-8 МБ):
+https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task
+
+После скачивания положи hand_landmarker.task рядом с этим файлом,
+в папку app/src/main/assets/. Без него приложение запустится,
+но распознавание работать не будет (в логах будет ошибка инициализации).
+
+Этот .txt можно потом удалить.

@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Up/down swipe arrows on the launcher icon -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,30 L44,44 L50,44 L50,52 L58,52 L58,44 L64,44 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,78 L64,64 L58,64 L58,56 L50,56 L50,64 L44,64 Z" />
+</vector>
