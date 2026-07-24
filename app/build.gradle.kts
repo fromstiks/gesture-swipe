@@ -15,13 +15,32 @@ android {
         versionName = "1.0"
     }
 
+    // Fixed key so every build shares one signature → updates install over each other.
+    // The keystore is never committed; CI writes it from a GitHub Actions secret.
+    val stableKeystore = file("stable.keystore")
+    val hasStableKeystore = stableKeystore.exists()
+    signingConfigs {
+        if (hasStableKeystore) {
+            create("stable") {
+                storeFile = stableKeystore
+                storePassword = "gesturepass"
+                keyAlias = "gestureswipe"
+                keyPassword = "gesturepass"
+            }
+        }
+    }
+
     buildTypes {
+        debug {
+            if (hasStableKeystore) signingConfig = signingConfigs.getByName("stable")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (hasStableKeystore) signingConfig = signingConfigs.getByName("stable")
         }
     }
 

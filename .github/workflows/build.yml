@@ -30,6 +30,19 @@ jobs:
             "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task"
           ls -lh app/src/main/assets/hand_landmarker.task
 
+      # Постоянный ключ подписи хранится в секрете (base64), не в репозитории.
+      # Без него сборка тоже пройдёт, но подпись будет одноразовая.
+      - name: Restore signing keystore
+        env:
+          STABLE_KEYSTORE_B64: ${{ secrets.STABLE_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$STABLE_KEYSTORE_B64" ]; then
+            echo "$STABLE_KEYSTORE_B64" | base64 -d > app/stable.keystore
+            echo "Signing keystore restored from secret."
+          else
+            echo "No STABLE_KEYSTORE_B64 secret set — falling back to default debug signing."
+          fi
+
       # В репозитории нет gradle-wrapper.jar (это бинарник) — генерируем на раннере.
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version 8.9

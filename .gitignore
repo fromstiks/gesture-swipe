@@ -12,3 +12,5 @@
 .cxx/
 # The model is large; download it per README instead of committing:
 /app/src/main/assets/hand_landmarker.task
+# Signing key must NOT be public — CI injects it from a GitHub Actions secret:
+/app/stable.keystore
