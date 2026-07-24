@@ -66,7 +66,7 @@ class PreviewActivity : AppCompatActivity() {
             swipeDetector.onFrame(palmY)
 
             runOnUiThread {
-                binding.overlay.setLandmarks(hand)
+                binding.overlay.setResults(hand, result.imageWidth, result.imageHeight)
                 val helper = handHelper
                 val err = helper?.initError
                 binding.stats.text = buildString {
@@ -89,6 +89,7 @@ class PreviewActivity : AppCompatActivity() {
         providerFuture.addListener({
             val provider = providerFuture.get()
 
+            binding.previewView.scaleType = androidx.camera.view.PreviewView.ScaleType.FILL_CENTER
             val preview = Preview.Builder().build().also {
                 it.setSurfaceProvider(binding.previewView.surfaceProvider)
             }

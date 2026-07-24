@@ -12,10 +12,15 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
-/** One detection result: the 21 landmarks of the first hand (or null), plus a running counter. */
+/**
+ * One detection result: the 21 landmarks of the first hand (or null), plus the size of the
+ * upright image the landmarks are normalized against (needed to align an overlay).
+ */
 data class HandResult(
     val landmarks: List<NormalizedLandmark>?,
-    val framesProcessed: Long
+    val framesProcessed: Long,
+    val imageWidth: Int,
+    val imageHeight: Int
 )
 
 /**
@@ -49,6 +54,10 @@ class HandLandmarkerHelper(
     @Volatile
     var framesProcessed: Long = 0L
         private set
+
+    // Size of the upright image the landmarks map onto (post-rotation), for overlay alignment.
+    @Volatile private var uprightWidth: Int = 0
+    @Volatile private var uprightHeight: Int = 0
 
     init {
         // CPU delegate: the GPU delegate can silently produce no results in LIVE_STREAM mode
@@ -87,7 +96,7 @@ class HandLandmarkerHelper(
 
     private fun handleResult(result: HandLandmarkerResult) {
         val hand = result.landmarks().firstOrNull()
-        onResult(HandResult(hand, framesProcessed))
+        onResult(HandResult(hand, framesProcessed, uprightWidth, uprightHeight))
     }
 
     /**
@@ -106,9 +115,20 @@ class HandLandmarkerHelper(
             // so the hand isn't skewed and detection is far more reliable.
             val bitmap = imageProxy.toBitmap()
 
+            // After rotation, width/height swap for 90°/270° — that's the frame the
+            // normalized landmarks map onto.
+            val rotation = imageProxy.imageInfo.rotationDegrees
+            if (rotation == 90 || rotation == 270) {
+                uprightWidth = imageProxy.height
+                uprightHeight = imageProxy.width
+            } else {
+                uprightWidth = imageProxy.width
+                uprightHeight = imageProxy.height
+            }
+
             val mpImage = BitmapImageBuilder(bitmap).build()
             val processingOptions = ImageProcessingOptions.builder()
-                .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
+                .setRotationDegrees(rotation)
                 .build()
 
             framesProcessed++

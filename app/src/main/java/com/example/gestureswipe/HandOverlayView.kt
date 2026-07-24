@@ -7,14 +7,20 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
+import kotlin.math.max
 
 /**
- * Draws MediaPipe hand landmarks over the camera preview so we can see, live, what is
- * being tracked. Normalized coords are mirrored on X to match the selfie-view preview.
+ * Draws MediaPipe hand landmarks over the camera preview.
+ *
+ * The landmarks are normalized to the analysis image (imageWidth × imageHeight), while the
+ * PreviewView shows that image scaled with FILL_CENTER (center-crop). We replicate that exact
+ * transform so the dots land on the real hand, and mirror X to match the selfie preview.
  */
 class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
 
     private var landmarks: List<NormalizedLandmark>? = null
+    private var imageWidth = 0
+    private var imageHeight = 0
 
     private val pointPaint = Paint().apply {
         color = Color.parseColor("#00E676")
@@ -32,7 +38,6 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         isAntiAlias = true
     }
 
-    // Bones connecting the 21 hand landmarks, for a simple skeleton.
     private val connections = listOf(
         0 to 1, 1 to 2, 2 to 3, 3 to 4,          // thumb
         0 to 5, 5 to 6, 6 to 7, 7 to 8,          // index
@@ -42,14 +47,28 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         0 to 17                                   // palm base
     )
 
-    fun setLandmarks(list: List<NormalizedLandmark>?) {
+    fun setResults(list: List<NormalizedLandmark>?, imgW: Int, imgH: Int) {
         landmarks = list
+        imageWidth = imgW
+        imageHeight = imgH
         invalidate()
     }
 
-    // Mirror X for the front (selfie) camera so the overlay lines up with the preview.
-    private fun px(lm: NormalizedLandmark) = (1f - lm.x()) * width
-    private fun py(lm: NormalizedLandmark) = lm.y() * height
+    // FILL_CENTER: scale so the image covers the view, centered; then mirror X for front camera.
+    private fun px(lm: NormalizedLandmark): Float {
+        if (imageWidth == 0) return lm.x() * width
+        val scale = max(width.toFloat() / imageWidth, height.toFloat() / imageHeight)
+        val offsetX = (width - imageWidth * scale) / 2f
+        val x = offsetX + lm.x() * imageWidth * scale
+        return width - x // mirror
+    }
+
+    private fun py(lm: NormalizedLandmark): Float {
+        if (imageHeight == 0) return lm.y() * height
+        val scale = max(width.toFloat() / imageWidth, height.toFloat() / imageHeight)
+        val offsetY = (height - imageHeight * scale) / 2f
+        return offsetY + lm.y() * imageHeight * scale
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
