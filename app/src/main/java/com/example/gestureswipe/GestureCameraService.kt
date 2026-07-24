@@ -7,9 +7,16 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.core.resolutionselector.ResolutionStrategy
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -40,19 +47,29 @@ class GestureCameraService : LifecycleService() {
     private var handHelper: HandLandmarkerHelper? = null
     private lateinit var swipeDetector: SwipeDetector
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val vibrator: Vibrator? by lazy {
+        getSystemService(Vibrator::class.java)
+    }
+
     override fun onCreate() {
         super.onCreate()
         startAsForeground()
 
+        // Detection runs on the camera background thread; hop to the main thread to
+        // buzz + dispatch the gesture (dispatchGesture wants a Looper thread).
         swipeDetector = SwipeDetector { direction ->
-            val a11y = SwipeAccessibilityService.instance
-            if (a11y == null) {
-                Log.w(TAG, "Swipe detected but accessibility service is not enabled.")
-                return@SwipeDetector
-            }
-            when (direction) {
-                SwipeDetector.Direction.UP -> a11y.swipeUp()
-                SwipeDetector.Direction.DOWN -> a11y.swipeDown()
+            mainHandler.post {
+                buzz()
+                val a11y = SwipeAccessibilityService.instance
+                if (a11y == null) {
+                    Log.w(TAG, "Swipe detected but accessibility service is not enabled.")
+                    return@post
+                }
+                when (direction) {
+                    SwipeDetector.Direction.UP -> a11y.swipeUp()
+                    SwipeDetector.Direction.DOWN -> a11y.swipeDown()
+                }
             }
         }
 
@@ -71,15 +88,31 @@ class GestureCameraService : LifecycleService() {
         return START_STICKY
     }
 
+    /** Short haptic tick so the user feels that a gesture registered. */
+    private fun buzz() {
+        vibrator?.vibrate(VibrationEffect.createOneShot(35, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+
     private fun startCamera() {
         val providerFuture = ProcessCameraProvider.getInstance(this)
         providerFuture.addListener({
             try {
                 val provider = providerFuture.get()
 
+                // Lower resolution → much faster MediaPipe inference → less lag.
+                val resolutionSelector = ResolutionSelector.Builder()
+                    .setResolutionStrategy(
+                        ResolutionStrategy(
+                            Size(480, 640),
+                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_LOWER_THEN_HIGHER
+                        )
+                    )
+                    .build()
+
                 val analysis = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                    .setResolutionSelector(resolutionSelector)
                     .build()
 
                 analysis.setAnalyzer(cameraExecutor) { imageProxy ->

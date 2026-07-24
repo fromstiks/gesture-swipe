@@ -16,9 +16,9 @@ import kotlin.math.abs
  * All thresholds are deliberately easy to tweak — real cameras/lighting need calibration.
  */
 class SwipeDetector(
-    private val windowMs: Long = 350L,
-    private val minDelta: Float = 0.20f,
-    private val cooldownMs: Long = 900L,
+    private val windowMs: Long = 450L,
+    private val minDelta: Float = 0.15f,
+    private val cooldownMs: Long = 600L,
     private val onSwipe: (Direction) -> Unit
 ) {
     enum class Direction { UP, DOWN }

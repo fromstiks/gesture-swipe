@@ -1,7 +1,6 @@
 package com.example.gestureswipe
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
@@ -35,27 +34,38 @@ class HandLandmarkerHelper(
     private var handLandmarker: HandLandmarker? = null
 
     init {
-        try {
-            val baseOptions = BaseOptions.builder()
-                .setModelAssetPath(MODEL_ASSET)
-                .setDelegate(Delegate.CPU) // switch to GPU if you validate it on your device
-                .build()
-
-            val options = HandLandmarker.HandLandmarkerOptions.builder()
-                .setBaseOptions(baseOptions)
-                .setRunningMode(RunningMode.LIVE_STREAM)
-                .setNumHands(1)
-                .setMinHandDetectionConfidence(0.5f)
-                .setMinTrackingConfidence(0.5f)
-                .setMinHandPresenceConfidence(0.5f)
-                .setResultListener { result, _ -> handleResult(result) }
-                .setErrorListener { e -> Log.e(TAG, "MediaPipe error", e) }
-                .build()
-
-            handLandmarker = HandLandmarker.createFromOptions(context, options)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to init HandLandmarker. Is hand_landmarker.task in assets?", e)
+        // Try the fast GPU delegate first; fall back to CPU if the device/model can't use it.
+        handLandmarker = try {
+            createLandmarker(context, Delegate.GPU)
+        } catch (gpuError: Throwable) {
+            Log.w(TAG, "GPU delegate unavailable, falling back to CPU", gpuError)
+            try {
+                createLandmarker(context, Delegate.CPU)
+            } catch (cpuError: Throwable) {
+                Log.e(TAG, "Failed to init HandLandmarker. Is hand_landmarker.task in assets?", cpuError)
+                null
+            }
         }
+    }
+
+    private fun createLandmarker(context: Context, delegate: Delegate): HandLandmarker {
+        val baseOptions = BaseOptions.builder()
+            .setModelAssetPath(MODEL_ASSET)
+            .setDelegate(delegate)
+            .build()
+
+        val options = HandLandmarker.HandLandmarkerOptions.builder()
+            .setBaseOptions(baseOptions)
+            .setRunningMode(RunningMode.LIVE_STREAM)
+            .setNumHands(1)
+            .setMinHandDetectionConfidence(0.4f)
+            .setMinTrackingConfidence(0.4f)
+            .setMinHandPresenceConfidence(0.4f)
+            .setResultListener { result, _ -> handleResult(result) }
+            .setErrorListener { e -> Log.e(TAG, "MediaPipe error", e) }
+            .build()
+
+        return HandLandmarker.createFromOptions(context, options)
     }
 
     private fun handleResult(result: HandLandmarkerResult) {
@@ -75,12 +85,9 @@ class HandLandmarkerHelper(
         }
 
         try {
-            val bitmap = Bitmap.createBitmap(
-                imageProxy.width,
-                imageProxy.height,
-                Bitmap.Config.ARGB_8888
-            )
-            bitmap.copyPixelsFromBuffer(imageProxy.planes[0].buffer)
+            // toBitmap() correctly handles row padding / stride, unlike a raw buffer copy,
+            // so the hand isn't skewed and detection is far more reliable.
+            val bitmap = imageProxy.toBitmap()
 
             val mpImage = BitmapImageBuilder(bitmap).build()
             val processingOptions = ImageProcessingOptions.builder()
