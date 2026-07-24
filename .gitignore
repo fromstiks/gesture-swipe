@@ -6,6 +6,7 @@
 .DS_Store
 /build/
 /app/build/
+/apk-download/
 /captures/
 .externalNativeBuild/
 .cxx/
