@@ -77,7 +77,8 @@ class GestureCameraService : LifecycleService() {
             }
         }
 
-        handHelper = HandLandmarkerHelper(this) { palmY ->
+        handHelper = HandLandmarkerHelper(this) { result ->
+            val palmY = result.landmarks?.getOrNull(HandLandmarkerHelper.PALM_LANDMARK)?.y()
             updateHandStatus(palmY != null)
             swipeDetector.onFrame(palmY)
         }

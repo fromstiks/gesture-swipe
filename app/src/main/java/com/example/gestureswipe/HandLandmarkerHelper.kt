@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions
@@ -11,27 +12,43 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 
+/** One detection result: the 21 landmarks of the first hand (or null), plus a running counter. */
+data class HandResult(
+    val landmarks: List<NormalizedLandmark>?,
+    val framesProcessed: Long
+)
+
 /**
  * Wraps MediaPipe HandLandmarker in LIVE_STREAM mode.
  *
- * Feed it CameraX frames via [detect]; it reports the palm's normalized Y position
- * (or null when no hand is seen) through [onPalmY], on MediaPipe's result thread.
+ * Feed it CameraX frames via [detect]; it reports each result through [onResult] on
+ * MediaPipe's own thread. [initError] is non-null if the model failed to load.
  *
- * The model file `hand_landmarker.task` must be placed in app/src/main/assets/.
+ * The model file `hand_landmarker.task` must be in app/src/main/assets/.
  * Download: https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task
  */
 class HandLandmarkerHelper(
     context: Context,
-    private val onPalmY: (Float?) -> Unit
+    private val onResult: (HandResult) -> Unit
 ) {
     companion object {
         private const val TAG = "HandLandmarkerHelper"
         private const val MODEL_ASSET = "hand_landmarker.task"
         // Landmark 9 = base of the middle finger ≈ centre of the palm; stable under rotation.
-        private const val PALM_LANDMARK = 9
+        const val PALM_LANDMARK = 9
     }
 
     private var handLandmarker: HandLandmarker? = null
+
+    /** Non-null if initialization failed (e.g. model missing) — surface this in the UI. */
+    var initError: String? = null
+        private set
+
+    val isReady: Boolean get() = handLandmarker != null
+
+    @Volatile
+    var framesProcessed: Long = 0L
+        private set
 
     init {
         // CPU delegate: the GPU delegate can silently produce no results in LIVE_STREAM mode
@@ -40,6 +57,7 @@ class HandLandmarkerHelper(
             createLandmarker(context, Delegate.CPU)
         } catch (e: Throwable) {
             Log.e(TAG, "Failed to init HandLandmarker. Is hand_landmarker.task in assets?", e)
+            initError = e.message ?: e.javaClass.simpleName
             null
         }
     }
@@ -58,15 +76,18 @@ class HandLandmarkerHelper(
             .setMinTrackingConfidence(0.4f)
             .setMinHandPresenceConfidence(0.4f)
             .setResultListener { result, _ -> handleResult(result) }
-            .setErrorListener { e -> Log.e(TAG, "MediaPipe error", e) }
+            .setErrorListener { e ->
+                Log.e(TAG, "MediaPipe error", e)
+                initError = e.message
+            }
             .build()
 
         return HandLandmarker.createFromOptions(context, options)
     }
 
     private fun handleResult(result: HandLandmarkerResult) {
-        val palmY = result.landmarks().firstOrNull()?.getOrNull(PALM_LANDMARK)?.y()
-        onPalmY(palmY)
+        val hand = result.landmarks().firstOrNull()
+        onResult(HandResult(hand, framesProcessed))
     }
 
     /**
@@ -90,9 +111,11 @@ class HandLandmarkerHelper(
                 .setRotationDegrees(imageProxy.imageInfo.rotationDegrees)
                 .build()
 
+            framesProcessed++
             landmarker.detectAsync(mpImage, processingOptions, imageProxy.imageInfo.timestamp)
         } catch (e: Exception) {
             Log.e(TAG, "detect() failed", e)
+            initError = "detect: ${e.message}"
         } finally {
             imageProxy.close()
         }

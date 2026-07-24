@@ -38,6 +38,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
         binding.btnToggleService.setOnClickListener { toggleService() }
+        binding.btnPreview.setOnClickListener {
+            startActivity(Intent(this, PreviewActivity::class.java))
+        }
     }
 
     override fun onResume() {

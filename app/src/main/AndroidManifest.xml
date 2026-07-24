@@ -28,6 +28,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".PreviewActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- Foreground camera service: keeps hand-tracking alive while TikTok is on top -->
         <service
             android:name=".GestureCameraService"
