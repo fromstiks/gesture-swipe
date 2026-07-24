@@ -34,17 +34,13 @@ class HandLandmarkerHelper(
     private var handLandmarker: HandLandmarker? = null
 
     init {
-        // Try the fast GPU delegate first; fall back to CPU if the device/model can't use it.
+        // CPU delegate: the GPU delegate can silently produce no results in LIVE_STREAM mode
+        // on some devices, so we use the reliable CPU path.
         handLandmarker = try {
-            createLandmarker(context, Delegate.GPU)
-        } catch (gpuError: Throwable) {
-            Log.w(TAG, "GPU delegate unavailable, falling back to CPU", gpuError)
-            try {
-                createLandmarker(context, Delegate.CPU)
-            } catch (cpuError: Throwable) {
-                Log.e(TAG, "Failed to init HandLandmarker. Is hand_landmarker.task in assets?", cpuError)
-                null
-            }
+            createLandmarker(context, Delegate.CPU)
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to init HandLandmarker. Is hand_landmarker.task in assets?", e)
+            null
         }
     }
 

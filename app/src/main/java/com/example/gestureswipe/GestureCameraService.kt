@@ -9,6 +9,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
@@ -52,6 +53,9 @@ class GestureCameraService : LifecycleService() {
         getSystemService(Vibrator::class.java)
     }
 
+    private var lastHandVisible: Boolean? = null
+    private var lastStatusUpdate = 0L
+
     override fun onCreate() {
         super.onCreate()
         startAsForeground()
@@ -74,6 +78,7 @@ class GestureCameraService : LifecycleService() {
         }
 
         handHelper = HandLandmarkerHelper(this) { palmY ->
+            updateHandStatus(palmY != null)
             swipeDetector.onFrame(palmY)
         }
 
@@ -132,6 +137,39 @@ class GestureCameraService : LifecycleService() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    private fun buildNotification(text: String): Notification {
+        val contentIntent = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_IMMUTABLE
+        )
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(getString(R.string.notif_title))
+            .setContentText(text)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentIntent(contentIntent)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .build()
+    }
+
+    /**
+     * DIAGNOSTIC: reflect whether MediaPipe currently sees a hand, in the notification.
+     * Pull down the shade to check. Throttled so we don't spam the notification manager.
+     */
+    private fun updateHandStatus(handVisible: Boolean) {
+        val now = SystemClock.uptimeMillis()
+        if (handVisible == lastHandVisible && now - lastStatusUpdate < 1000L) return
+        lastHandVisible = handVisible
+        lastStatusUpdate = now
+
+        val text = if (handVisible) "✋ Рука в кадре — маши вверх/вниз" else "Руки не видно"
+        mainHandler.post {
+            getSystemService(NotificationManager::class.java)
+                ?.notify(NOTIFICATION_ID, buildNotification(text))
+        }
+    }
+
     private fun startAsForeground() {
         val manager = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -143,19 +181,7 @@ class GestureCameraService : LifecycleService() {
             manager.createNotificationChannel(channel)
         }
 
-        val contentIntent = PendingIntent.getActivity(
-            this, 0,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle(getString(R.string.notif_title))
-            .setContentText(getString(R.string.notif_text))
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(contentIntent)
-            .setOngoing(true)
-            .build()
+        val notification = buildNotification(getString(R.string.notif_text))
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA)
