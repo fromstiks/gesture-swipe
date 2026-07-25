@@ -64,12 +64,15 @@ class GestureCameraService : LifecycleService() {
         // buzz + dispatch the gesture (dispatchGesture wants a Looper thread).
         swipeDetector = SwipeDetector { direction ->
             mainHandler.post {
-                buzz()
                 val a11y = SwipeAccessibilityService.instance
                 if (a11y == null) {
+                    // Long buzz = gesture recognised but the swipe service is OFF → enable it.
                     Log.w(TAG, "Swipe detected but accessibility service is not enabled.")
+                    buzzLong()
                     return@post
                 }
+                // Short buzz = swipe actually dispatched to the system.
+                buzz()
                 when (direction) {
                     SwipeDetector.Direction.UP -> a11y.swipeUp()
                     SwipeDetector.Direction.DOWN -> a11y.swipeDown()
@@ -94,9 +97,14 @@ class GestureCameraService : LifecycleService() {
         return START_STICKY
     }
 
-    /** Short haptic tick so the user feels that a gesture registered. */
+    /** Short tick = swipe dispatched. */
     private fun buzz() {
         vibrator?.vibrate(VibrationEffect.createOneShot(35, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+
+    /** Long buzz = gesture recognised but the accessibility swipe service is disabled. */
+    private fun buzzLong() {
+        vibrator?.vibrate(VibrationEffect.createOneShot(300, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
     private fun startCamera() {

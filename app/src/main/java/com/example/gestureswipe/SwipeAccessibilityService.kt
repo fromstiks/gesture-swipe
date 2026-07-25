@@ -3,6 +3,7 @@ package com.example.gestureswipe
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.GestureDescription
 import android.graphics.Path
+import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 
 /**
@@ -15,11 +16,14 @@ import android.view.accessibility.AccessibilityEvent
 class SwipeAccessibilityService : AccessibilityService() {
 
     companion object {
+        private const val TAG = "SwipeA11y"
+
         @Volatile
         var instance: SwipeAccessibilityService? = null
             private set
 
-        private const val GESTURE_DURATION_MS = 180L
+        // Snappier fling: bigger travel, shorter time → registers reliably as a scroll.
+        private const val GESTURE_DURATION_MS = 110L
     }
 
     override fun onServiceConnected() {
@@ -42,10 +46,10 @@ class SwipeAccessibilityService : AccessibilityService() {
     override fun onInterrupt() { /* not needed */ }
 
     /** Swipe content up → next video (finger moves from lower to upper part of the screen). */
-    fun swipeUp() = swipeVertical(fromFraction = 0.72f, toFraction = 0.28f)
+    fun swipeUp() = swipeVertical(fromFraction = 0.80f, toFraction = 0.20f)
 
     /** Swipe content down → previous video. */
-    fun swipeDown() = swipeVertical(fromFraction = 0.28f, toFraction = 0.72f)
+    fun swipeDown() = swipeVertical(fromFraction = 0.20f, toFraction = 0.80f)
 
     private fun swipeVertical(fromFraction: Float, toFraction: Float) {
         val metrics = resources.displayMetrics
@@ -60,6 +64,20 @@ class SwipeAccessibilityService : AccessibilityService() {
 
         val stroke = GestureDescription.StrokeDescription(path, 0L, GESTURE_DURATION_MS)
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
-        dispatchGesture(gesture, null, null)
+
+        val dispatched = dispatchGesture(
+            gesture,
+            object : GestureResultCallback() {
+                override fun onCompleted(description: GestureDescription?) {
+                    Log.d(TAG, "gesture completed")
+                }
+
+                override fun onCancelled(description: GestureDescription?) {
+                    Log.w(TAG, "gesture cancelled")
+                }
+            },
+            null
+        )
+        Log.d(TAG, "dispatchGesture returned $dispatched")
     }
 }
