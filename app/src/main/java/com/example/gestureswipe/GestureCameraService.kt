@@ -77,6 +77,11 @@ class GestureCameraService : LifecycleService() {
     private var overlayPreview: PreviewView? = null
     private var overlayHand: HandOverlayView? = null
     private var overlayStatus: TextView? = null
+    private var overlayParams: WindowManager.LayoutParams? = null
+
+    @Volatile
+    private var paused = false
+    private var previewCollapsed = false
 
     override fun onCreate() {
         super.onCreate()
@@ -166,7 +171,9 @@ class GestureCameraService : LifecycleService() {
                     .build()
 
                 analysis.setAnalyzer(cameraExecutor) { imageProxy ->
-                    when (mode) {
+                    if (paused) {
+                        imageProxy.close()
+                    } else when (mode) {
                         AppPrefs.Mode.HAND -> handHelper?.detect(imageProxy) ?: imageProxy.close()
                         AppPrefs.Mode.MOTION -> motionDetector?.detect(imageProxy) ?: imageProxy.close()
                     }
@@ -205,9 +212,13 @@ class GestureCameraService : LifecycleService() {
         overlayPreview = root.findViewById(R.id.overlayPreview)
         overlayHand = root.findViewById(R.id.overlayHand)
         overlayStatus = root.findViewById(R.id.overlayStatus)
+        val previewBox = root.findViewById<View>(R.id.previewBox)
+        val dragHandle = root.findViewById<TextView>(R.id.dragHandle)
+        val btnPause = root.findViewById<TextView>(R.id.btnPause)
+        val btnHide = root.findViewById<TextView>(R.id.btnHide)
 
         val params = WindowManager.LayoutParams(
-            dp(130), dp(200),
+            dp(140), dp(210),
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
@@ -216,10 +227,27 @@ class GestureCameraService : LifecycleService() {
             x = dp(8)
             y = dp(90)
         }
+        overlayParams = params
 
-        // Simple drag handling.
+        // Pause / resume detection.
+        btnPause.setOnClickListener {
+            paused = !paused
+            btnPause.text = if (paused) "▶" else "⏸"
+            setOverlayStatus(if (paused) "на паузе" else "работает")
+        }
+
+        // Collapse to a compact movable button (hide the camera preview).
+        btnHide.setOnClickListener {
+            previewCollapsed = !previewCollapsed
+            previewBox.visibility = if (previewCollapsed) View.GONE else View.VISIBLE
+            btnHide.text = if (previewCollapsed) "🔍" else "🙈"
+            params.height = if (previewCollapsed) WindowManager.LayoutParams.WRAP_CONTENT else dp(210)
+            try { wm.updateViewLayout(root, params) } catch (_: Exception) {}
+        }
+
+        // Drag only by the header handle, so the buttons stay clickable.
         var downX = 0f; var downY = 0f; var startX = 0; var startY = 0
-        root.setOnTouchListener { _, ev ->
+        dragHandle.setOnTouchListener { _, ev ->
             when (ev.action) {
                 MotionEvent.ACTION_DOWN -> {
                     downX = ev.rawX; downY = ev.rawY; startX = params.x; startY = params.y; true
@@ -227,7 +255,8 @@ class GestureCameraService : LifecycleService() {
                 MotionEvent.ACTION_MOVE -> {
                     params.x = startX + (ev.rawX - downX).toInt()
                     params.y = startY + (ev.rawY - downY).toInt()
-                    wm.updateViewLayout(root, params); true
+                    try { wm.updateViewLayout(root, params) } catch (_: Exception) {}
+                    true
                 }
                 else -> false
             }

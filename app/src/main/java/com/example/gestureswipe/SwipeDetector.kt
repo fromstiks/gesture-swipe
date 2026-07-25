@@ -17,8 +17,8 @@ import kotlin.math.abs
  */
 class SwipeDetector(
     private val windowMs: Long = 450L,
-    private val minDelta: Float = 0.15f,
-    private val cooldownMs: Long = 600L,
+    private val minDelta: Float = 0.22f,
+    private val cooldownMs: Long = 1000L,
     private val onSwipe: (Direction) -> Unit
 ) {
     enum class Direction { UP, DOWN }

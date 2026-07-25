@@ -1,29 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="#CC000000">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/overlayPreview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <com.example.gestureswipe.HandOverlayView
-        android:id="@+id/overlayHand"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <TextView
-        android:id="@+id/overlayStatus"
+    <!-- Header: drag handle + control buttons -->
+    <LinearLayout
+        android:id="@+id/controls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:background="#99000000"
-        android:paddingHorizontal="6dp"
-        android:paddingVertical="3dp"
-        android:textColor="@color/white"
-        android:textSize="11sp"
-        android:text="…" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#33FFFFFF">
 
-</FrameLayout>
+        <TextView
+            android:id="@+id/dragHandle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="6dp"
+            android:text="⠿ двигать"
+            android:textColor="@color/white"
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/btnPause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="⏸"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/btnHide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="🙈"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Preview + overlay + status -->
+    <FrameLayout
+        android:id="@+id/previewBox"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.camera.view.PreviewView
+            android:id="@+id/overlayPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.example.gestureswipe.HandOverlayView
+            android:id="@+id/overlayHand"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:id="@+id/overlayStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="#99000000"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="3dp"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:text="…" />
+    </FrameLayout>
+
+</LinearLayout>
