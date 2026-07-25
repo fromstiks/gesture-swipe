@@ -66,11 +66,25 @@
             android:text="@string/btn_start" />
 
         <Button
+            android:id="@+id/btnOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="🪟 Разрешить окно поверх TikTok" />
+
+        <Button
             android:id="@+id/btnPreview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="🔍 Отладка: превью камеры" />
+
+        <TextView
+            android:id="@+id/modeInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Режим распознавания меняется в экране отладки." />
 
     </LinearLayout>
 </ScrollView>

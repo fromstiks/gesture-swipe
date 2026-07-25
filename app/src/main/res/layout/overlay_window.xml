@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC000000">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/overlayPreview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.example.gestureswipe.HandOverlayView
+        android:id="@+id/overlayHand"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/overlayStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#99000000"
+        android:paddingHorizontal="6dp"
+        android:paddingVertical="3dp"
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:text="…" />
+
+</FrameLayout>

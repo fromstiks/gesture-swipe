@@ -21,6 +21,7 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
     private var landmarks: List<NormalizedLandmark>? = null
     private var imageWidth = 0
     private var imageHeight = 0
+    private var motionY: Float? = null // normalized 0..1 for motion mode, or null
 
     private val pointPaint = Paint().apply {
         color = Color.parseColor("#00E676")
@@ -37,6 +38,11 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         strokeWidth = 4f
         isAntiAlias = true
     }
+    private val motionPaint = Paint().apply {
+        color = Color.parseColor("#FFEA00")
+        strokeWidth = 10f
+        isAntiAlias = true
+    }
 
     private val connections = listOf(
         0 to 1, 1 to 2, 2 to 3, 3 to 4,          // thumb
@@ -51,6 +57,14 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
         landmarks = list
         imageWidth = imgW
         imageHeight = imgH
+        motionY = null
+        invalidate()
+    }
+
+    /** Motion mode: draw a horizontal line at the current motion centroid (or clear with null). */
+    fun setMotionY(y: Float?) {
+        motionY = y
+        landmarks = null
         invalidate()
     }
 
@@ -72,6 +86,13 @@ class HandOverlayView(context: Context, attrs: AttributeSet?) : View(context, at
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        motionY?.let { y ->
+            val py = y * height
+            canvas.drawLine(0f, py, width.toFloat(), py, motionPaint)
+            return
+        }
+
         val lms = landmarks ?: return
 
         for ((a, b) in connections) {

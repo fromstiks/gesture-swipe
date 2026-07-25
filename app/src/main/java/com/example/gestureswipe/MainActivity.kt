@@ -41,6 +41,16 @@ class MainActivity : AppCompatActivity() {
         binding.btnPreview.setOnClickListener {
             startActivity(Intent(this, PreviewActivity::class.java))
         }
+        binding.btnOverlay.setOnClickListener {
+            if (!Settings.canDrawOverlays(this)) {
+                startActivity(
+                    Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        android.net.Uri.parse("package:$packageName")
+                    )
+                )
+            }
+        }
     }
 
     override fun onResume() {
@@ -87,6 +97,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnToggleService.text =
             getString(if (running) R.string.btn_stop else R.string.btn_start)
+
+        val overlayOk = Settings.canDrawOverlays(this)
+        val modeName = if (AppPrefs.getMode(this) == AppPrefs.Mode.MOTION) "Палец / движение" else "Рука"
+        binding.modeInfo.text = buildString {
+            append("Режим: $modeName (меняется в экране отладки)\n")
+            append(if (overlayOk) "Окно поверх: разрешено" else "Окно поверх: нет (жми кнопку выше)")
+        }
+        binding.btnOverlay.isEnabled = !overlayOk
     }
 
     private fun hasCameraPermission(): Boolean =

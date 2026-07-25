@@ -13,6 +13,12 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        // Only ship arm64 native libs (modern phones incl. OnePlus 9) — much smaller APK,
+        // and keeps it under Telegram's 50 MB bot upload limit.
+        ndk {
+            abiFilters += "arm64-v8a"
+        }
     }
 
     // Fixed key so every build shares one signature → updates install over each other.

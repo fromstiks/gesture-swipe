@@ -56,3 +56,22 @@ jobs:
           name: gesture-swipe-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Optional: auto-deliver the APK to Telegram if bot secrets are configured.
+      - name: Send APK to Telegram
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          APK=app/build/outputs/apk/debug/app-debug.apk
+          if [ -n "$TG_TOKEN" ] && [ -n "$TG_CHAT" ]; then
+            SIZE=$(stat -c%s "$APK")
+            echo "APK size: $((SIZE/1024/1024)) MB"
+            curl -sS -X POST "https://api.telegram.org/bot$TG_TOKEN/sendDocument" \
+              -F chat_id="$TG_CHAT" \
+              -F document=@"$APK" \
+              -F caption="GestureSwipe: свежая сборка ✅" \
+              && echo "Sent to Telegram." || echo "Telegram send failed (file may exceed 50 MB)."
+          else
+            echo "Telegram secrets not set; skipping delivery."
+          fi
