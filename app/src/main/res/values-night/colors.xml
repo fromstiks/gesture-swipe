@@ -1,0 +1,5 @@
+<resources>
+    <color name="status_good">#4ADE80</color>
+    <color name="status_bad">#F87171</color>
+    <color name="neu_shadow">#66000000</color>
+</resources>

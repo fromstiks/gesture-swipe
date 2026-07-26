@@ -1,0 +1,18 @@
+<resources>
+    <!-- Dark (neumorphic soft UI) -->
+    <style name="Theme.GestureSwipe" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#9B8CFF</item>
+        <item name="colorOnPrimary">#1A1030</item>
+        <item name="colorPrimaryContainer">#3A2F6B</item>
+        <item name="colorOnPrimaryContainer">#E4DEFF</item>
+
+        <item name="android:colorBackground">#20242B</item>
+        <item name="colorSurface">#20242B</item>
+        <item name="colorSurfaceVariant">#20242B</item>
+        <item name="colorOnSurface">#E3E7EF</item>
+        <item name="colorOnSurfaceVariant">#A9B0C0</item>
+
+        <item name="android:statusBarColor">#20242B</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

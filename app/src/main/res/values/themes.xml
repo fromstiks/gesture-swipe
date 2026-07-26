@@ -1,5 +1,18 @@
 <resources>
+    <!-- Light (neumorphic soft UI). Dark variant is in values-night/themes.xml -->
     <style name="Theme.GestureSwipe" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimary">#6C5CE7</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#DCD6FF</item>
+        <item name="colorOnPrimaryContainer">#221A4E</item>
+
+        <item name="android:colorBackground">#E6EBF2</item>
+        <item name="colorSurface">#E6EBF2</item>
+        <item name="colorSurfaceVariant">#E6EBF2</item>
+        <item name="colorOnSurface">#2C3040</item>
+        <item name="colorOnSurfaceVariant">#5A6072</item>
+
+        <item name="android:statusBarColor">#E6EBF2</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

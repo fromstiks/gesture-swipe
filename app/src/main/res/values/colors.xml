@@ -1,5 +1,10 @@
 <resources>
-    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_500">#FF6C5CE7</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
+
+    <!-- Status colors (light). Night variants in values-night/colors.xml -->
+    <color name="status_good">#1F9D57</color>
+    <color name="status_bad">#C0392B</color>
+    <color name="neu_shadow">#33000000</color>
 </resources>

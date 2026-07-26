@@ -1,90 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="20dp">
 
+        <!-- Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+            android:text="GestureSwipe"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="26sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Листай ленту жестом руки, не касаясь экрана. Выполни 3 шага по порядку."
-            android:paddingBottom="24dp" />
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="18dp"
+            android:text="Листай ленту жестом руки без касания экрана"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="13sp" />
 
+        <!-- Status card -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/NeuCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/statusCamera"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="5dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:text="Камера" />
+
+                <TextView
+                    android:id="@+id/statusA11y"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="5dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:text="Служба свайпов" />
+
+                <TextView
+                    android:id="@+id/statusService"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="5dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textSize="14sp"
+                    android:text="Распознавание" />
+
+                <TextView
+                    android:id="@+id/modeInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="12sp"
+                    android:text="Режим…" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Setup section -->
         <TextView
-            android:id="@+id/statusCamera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/status_camera_off"
-            android:paddingBottom="4dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Настройка"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/statusA11y"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/status_a11y_off"
-            android:paddingBottom="4dp" />
-
-        <TextView
-            android:id="@+id/statusService"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/status_service_off"
-            android:paddingBottom="24dp" />
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGrantCamera"
+            style="@style/NeuButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_grant_camera"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Доступ к камере" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOpenA11y"
+            style="@style/NeuButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_open_a11y"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="8dp"
+            android:text="Служба свайпов" />
 
-        <Button
-            android:id="@+id/btnToggleService"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_start" />
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnOverlay"
+            style="@style/NeuButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="🪟 Разрешить окно поверх TikTok" />
+            android:layout_marginBottom="8dp"
+            android:text="Окно поверх TikTok" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreview"
+            style="@style/NeuButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="🔍 Отладка: превью камеры" />
+            android:text="Отладка · превью камеры" />
 
-        <TextView
-            android:id="@+id/modeInfo"
+        <!-- Primary action -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnToggleService"
+            style="@style/NeuButton.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Режим распознавания меняется в экране отладки." />
+            android:layout_marginTop="22dp"
+            android:text="Запустить распознавание" />
 
     </LinearLayout>
 </ScrollView>

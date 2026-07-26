@@ -88,12 +88,9 @@ class MainActivity : AppCompatActivity() {
         val a11yOk = isAccessibilityServiceEnabled()
         val running = GestureCameraService.isRunning
 
-        binding.statusCamera.text =
-            getString(if (camOk) R.string.status_camera_on else R.string.status_camera_off)
-        binding.statusA11y.text =
-            getString(if (a11yOk) R.string.status_a11y_on else R.string.status_a11y_off)
-        binding.statusService.text =
-            getString(if (running) R.string.status_service_on else R.string.status_service_off)
+        setStatus(binding.statusCamera, camOk, "Камера — доступ выдан", "Камера — нет доступа")
+        setStatus(binding.statusA11y, a11yOk, "Служба свайпов — включена", "Служба свайпов — выключена")
+        setStatus(binding.statusService, running, "Распознавание — работает", "Распознавание — остановлено")
 
         binding.btnToggleService.text =
             getString(if (running) R.string.btn_stop else R.string.btn_start)
@@ -105,6 +102,13 @@ class MainActivity : AppCompatActivity() {
             append(if (overlayOk) "Окно поверх: разрешено" else "Окно поверх: нет (жми кнопку выше)")
         }
         binding.btnOverlay.isEnabled = !overlayOk
+    }
+
+    private fun setStatus(view: android.widget.TextView, ok: Boolean, onText: String, offText: String) {
+        view.text = (if (ok) "✓  " else "✗  ") + (if (ok) onText else offText)
+        view.setTextColor(
+            ContextCompat.getColor(this, if (ok) R.color.status_good else R.color.status_bad)
+        )
     }
 
     private fun hasCameraPermission(): Boolean =
