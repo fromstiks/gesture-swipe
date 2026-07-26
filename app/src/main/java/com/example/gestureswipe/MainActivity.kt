@@ -9,8 +9,10 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import com.example.gestureswipe.databinding.ActivityMainBinding
 
@@ -29,9 +31,21 @@ class MainActivity : AppCompatActivity() {
     ) { refreshStatus() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        AppCompatDelegate.setDefaultNightMode(AppPrefs.getNightMode(this))
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.btnThemeToggle.text = if (AppPrefs.isDark(this)) "🌙" else "☀️"
+        binding.btnThemeToggle.setOnClickListener { toggleTheme() }
+
+        // Setup accordion.
+        binding.setupHeader.setOnClickListener {
+            val open = binding.setupContent.visibility == View.VISIBLE
+            binding.setupContent.visibility = if (open) View.GONE else View.VISIBLE
+            binding.setupHeader.text =
+                if (open) "⚙️  Первичная настройка   ▾" else "⚙️  Первичная настройка   ▴"
+        }
 
         binding.btnGrantCamera.setOnClickListener { requestPermissions() }
         binding.btnOpenA11y.setOnClickListener {
@@ -56,6 +70,16 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
+    }
+
+    private fun toggleTheme() {
+        val newMode = if (AppPrefs.isDark(this)) {
+            AppCompatDelegate.MODE_NIGHT_NO
+        } else {
+            AppCompatDelegate.MODE_NIGHT_YES
+        }
+        AppPrefs.setNightMode(this, newMode)
+        AppCompatDelegate.setDefaultNightMode(newMode) // recreates the activity with the new theme
     }
 
     private fun requestPermissions() {

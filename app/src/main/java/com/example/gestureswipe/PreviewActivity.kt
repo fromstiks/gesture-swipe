@@ -43,6 +43,7 @@ class PreviewActivity : AppCompatActivity() {
     ) { granted -> if (granted) startCamera() else binding.stats.text = "Нет разрешения на камеру" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(AppPrefs.getNightMode(this))
         super.onCreate(savedInstanceState)
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)

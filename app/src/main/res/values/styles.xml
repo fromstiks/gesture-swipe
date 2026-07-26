@@ -1,34 +1,59 @@
 <resources>
 
-    <!-- Soft raised card that blends with the background (neumorphic look). -->
+    <!-- Soft raised card that blends with the background. -->
     <style name="NeuCard" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardBackgroundColor">?attr/colorSurface</item>
-        <item name="cardCornerRadius">22dp</item>
-        <item name="cardElevation">6dp</item>
-        <item name="contentPadding">16dp</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="cardCornerRadius">18dp</item>
+        <item name="cardElevation">4dp</item>
+        <item name="contentPadding">14dp</item>
     </style>
 
-    <!-- Small soft button, same colour as the surface → raised neumorphic feel. -->
+    <!-- Main soft 3D button. -->
     <style name="NeuButton" parent="Widget.Material3.Button">
-        <item name="backgroundTint">?attr/colorSurface</item>
-        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="backgroundTint">@color/btn_fill</item>
+        <item name="android:textColor">@color/btn_text</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:minHeight">46dp</item>
-        <item name="cornerRadius">18dp</item>
-        <item name="android:elevation">5dp</item>
-        <item name="android:insetTop">3dp</item>
-        <item name="android:insetBottom">3dp</item>
-        <item name="rippleColor">#332C3040</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:minHeight">42dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="android:elevation">4dp</item>
+        <item name="android:insetTop">2dp</item>
+        <item name="android:insetBottom">2dp</item>
+        <item name="rippleColor">#33000000</item>
+    </style>
+
+    <!-- Smaller button for the one-time setup accordion. -->
+    <style name="NeuButton.Small" parent="NeuButton">
+        <item name="android:textSize">12sp</item>
+        <item name="android:minHeight">38dp</item>
     </style>
 
     <!-- Primary accent button (Start / Stop). -->
     <style name="NeuButton.Primary" parent="NeuButton">
-        <item name="backgroundTint">?attr/colorPrimary</item>
-        <item name="android:textColor">?attr/colorOnPrimary</item>
+        <item name="backgroundTint">@color/primary_fill</item>
+        <item name="android:textColor">@color/primary_text</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:minHeight">54dp</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:minHeight">50dp</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
+    <!-- Accordion header (tap to expand). -->
+    <style name="AccordionHeader">
+        <item name="android:textColor">@color/on_surface</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+    </style>
+
+    <!-- Small grey helper/comment text. -->
+    <style name="HelpText">
+        <item name="android:textColor">@color/on_surface_var</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:paddingStart">4dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:lineSpacingExtra">2dp</item>
     </style>
 
 </resources>

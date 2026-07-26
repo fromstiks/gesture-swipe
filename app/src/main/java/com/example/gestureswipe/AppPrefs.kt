@@ -1,12 +1,29 @@
 package com.example.gestureswipe
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 
 /** Tiny wrapper over SharedPreferences for the detection-mode choice. */
 object AppPrefs {
     private const val FILE = "gesture_prefs"
     private const val KEY_MODE = "mode"
     private const val KEY_SENS = "sensitivity"
+    private const val KEY_NIGHT = "night_mode"
+
+    // --- Theme (manual light/dark toggle) ---
+
+    /** Default to the dark (black + sand) theme. */
+    fun getNightMode(context: Context): Int =
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .getInt(KEY_NIGHT, AppCompatDelegate.MODE_NIGHT_YES)
+
+    fun setNightMode(context: Context, mode: Int) {
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+            .edit().putInt(KEY_NIGHT, mode).apply()
+    }
+
+    fun isDark(context: Context): Boolean =
+        getNightMode(context) == AppCompatDelegate.MODE_NIGHT_YES
 
     /** 0..100; 50 == the current default tuning. */
     const val DEFAULT_SENSITIVITY = 50

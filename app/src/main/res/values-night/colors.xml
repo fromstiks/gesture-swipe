@@ -1,5 +1,15 @@
 <resources>
+    <!-- DARK theme: black background + sandy buttons -->
+    <color name="app_bg">#0E0F11</color>
+    <color name="surface">#17181B</color>
+    <color name="on_surface">#ECEFF3</color>
+    <color name="on_surface_var">#A7AEB6</color>
+
+    <color name="btn_fill">#DAC49C</color>
+    <color name="btn_text">#241E12</color>
+    <color name="primary_fill">#CBA968</color>
+    <color name="primary_text">#201A0E</color>
+
     <color name="status_good">#4ADE80</color>
     <color name="status_bad">#F87171</color>
-    <color name="neu_shadow">#66000000</color>
 </resources>

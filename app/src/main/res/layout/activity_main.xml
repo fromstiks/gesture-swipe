@@ -9,24 +9,42 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="22dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Header row: title + theme toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="GestureSwipe"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:paddingBottom="6dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="GestureSwipe"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnThemeToggle"
+                style="@style/NeuButton.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌙" />
+        </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="18dp"
             android:text="Листай ленту жестом руки, не касаясь экрана."
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:paddingBottom="20dp" />
+            android:textSize="13sp" />
 
+        <!-- Status lines -->
         <TextView
             android:id="@+id/statusCamera"
             android:layout_width="wrap_content"
@@ -47,54 +65,93 @@
             android:id="@+id/statusService"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingBottom="20dp"
+            android:paddingBottom="16dp"
             android:textSize="14sp"
             android:text="Распознавание" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGrantCamera"
-            style="@style/NeuButton"
+        <!-- Setup accordion header -->
+        <TextView
+            android:id="@+id/setupHeader"
+            style="@style/AccordionHeader"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="1. Дать доступ к камере" />
+            android:text="⚙️  Первичная настройка   ▾" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOpenA11y"
-            style="@style/NeuButton"
+        <!-- Setup accordion content (collapsed by default) -->
+        <LinearLayout
+            android:id="@+id/setupContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="2. Включить службу свайпов" />
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingTop="8dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnOverlay"
-            style="@style/NeuButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="🪟 Разрешить окно поверх TikTok" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnGrantCamera"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="1 · Дать доступ к камере" />
 
+            <!-- comment / instruction -->
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:text="Разреши доступ к камере (и уведомления на Android 13+)." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOpenA11y"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="2 · Включить службу свайпов" />
+
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:text="Если пишет «ограниченный доступ»:\nНастройки → Приложения → Управление приложениями → GestureSwipe → ⋮ (три точки вверху справа) → «Разрешить ограниченные настройки».\nПотом Настройки → Спец. возможности → GestureSwipe → включить тумблер." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnOverlay"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3 · Окно поверх TikTok" />
+
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:text="Разреши показ поверх других приложений — чтобы видеть мини-превью камеры в TikTok." />
+        </LinearLayout>
+
+        <!-- Primary action -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnToggleService"
             style="@style/NeuButton.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="3. Запустить распознавание" />
+            android:layout_marginTop="18dp"
+            android:text="Запустить распознавание" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPreview"
             style="@style/NeuButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🔍 Отладка · превью камеры" />
+            android:layout_marginTop="10dp"
+            android:text="🔍 Отладка · превью и чувствительность" />
 
         <TextView
             android:id="@+id/modeInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="12sp"
             android:text="Режим…" />

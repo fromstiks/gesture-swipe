@@ -3,8 +3,17 @@
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
 
-    <!-- Status colors (light). Night variants in values-night/colors.xml -->
+    <!-- LIGHT theme: white background + light-blue buttons -->
+    <color name="app_bg">#F3F7FB</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_surface">#16232D</color>
+    <color name="on_surface_var">#5C6B76</color>
+
+    <color name="btn_fill">#AEDAEE</color>
+    <color name="btn_text">#0B3A4F</color>
+    <color name="primary_fill">#5FB4D8</color>
+    <color name="primary_text">#04222E</color>
+
     <color name="status_good">#1F9D57</color>
     <color name="status_bad">#C0392B</color>
-    <color name="neu_shadow">#33000000</color>
 </resources>
