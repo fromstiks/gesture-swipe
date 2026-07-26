@@ -107,6 +107,12 @@ class GestureCameraService : LifecycleService() {
         }
 
         setupEngines()
+
+        // Apply saved sensitivity to the detectors.
+        val sens = AppPrefs.getSensitivity(this)
+        swipeDetector.minDelta = AppPrefs.minDelta(sens)
+        motionDetector?.minMovingPixels = AppPrefs.minMovingPixels(sens)
+
         setupOverlay()
 
         cameraExecutor = Executors.newSingleThreadExecutor()

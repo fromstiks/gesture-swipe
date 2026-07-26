@@ -100,6 +100,18 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
 
+        // Sensitivity slider — retunes the detectors live and persists for the service.
+        val sens = AppPrefs.getSensitivity(this)
+        applySensitivity(sens)
+        binding.sensSlider.value = sens.toFloat()
+        binding.sensLabel.text = "Чувствительность: $sens"
+        binding.sensSlider.addOnChangeListener { _, value, _ ->
+            val v = value.toInt()
+            binding.sensLabel.text = "Чувствительность: $v"
+            AppPrefs.setSensitivity(this, v)
+            applySensitivity(v)
+        }
+
         cameraExecutor = Executors.newSingleThreadExecutor()
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -109,6 +121,11 @@ class PreviewActivity : AppCompatActivity() {
         } else {
             permissionLauncher.launch(Manifest.permission.CAMERA)
         }
+    }
+
+    private fun applySensitivity(sens: Int) {
+        swipeDetector.minDelta = AppPrefs.minDelta(sens)
+        motionDetector?.minMovingPixels = AppPrefs.minMovingPixels(sens)
     }
 
     private fun updateModeLabel() {

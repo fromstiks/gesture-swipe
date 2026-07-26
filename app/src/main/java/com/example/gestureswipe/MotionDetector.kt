@@ -21,8 +21,11 @@ class MotionDetector(private val onMotionY: (Float?) -> Unit) {
         private const val GW = 24   // downscaled grid width
         private const val GH = 32   // downscaled grid height
         private const val PIXEL_DELTA = 30          // per-pixel brightness change to count as motion
-        private const val MIN_MOVING_PIXELS = 50    // need at least this many moving cells (of 768)
     }
+
+    /** Required moving-pixel count; retunable via the sensitivity slider. */
+    @Volatile
+    var minMovingPixels: Int = 50
 
     private var prevGray: IntArray? = null
     private val pixels = IntArray(GW * GH)
@@ -81,7 +84,7 @@ class MotionDetector(private val onMotionY: (Float?) -> Unit) {
             }
             lastMotionAmount = movingPixels
 
-            if (movingPixels < MIN_MOVING_PIXELS || weight <= 0.0) {
+            if (movingPixels < minMovingPixels || weight <= 0.0) {
                 onMotionY(null)
                 return
             }

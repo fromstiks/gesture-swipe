@@ -17,7 +17,8 @@ import kotlin.math.abs
  */
 class SwipeDetector(
     private val windowMs: Long = 450L,
-    private val minDelta: Float = 0.22f,
+    // Mutable so a sensitivity slider can retune it live.
+    var minDelta: Float = 0.22f,
     private val cooldownMs: Long = 1000L,
     private val onSwipe: (Direction) -> Unit
 ) {
