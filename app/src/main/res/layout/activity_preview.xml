@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
@@ -53,14 +54,39 @@
             android:stepSize="1"
             android:value="50" />
 
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/modeSwitch"
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/modeGroup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="6dp"
-            android:textColor="@color/white"
-            android:text="Режим" />
+            android:layout_marginTop="8dp"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModeHand"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="Рука" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModeMotion"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="Палец" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnModePinch"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minWidth="0dp"
+                android:text="Щипок" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
     </LinearLayout>
 
 </FrameLayout>

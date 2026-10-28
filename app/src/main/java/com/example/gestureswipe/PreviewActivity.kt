@@ -8,6 +8,7 @@ import android.os.Vibrator
 import android.util.Size
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -21,9 +22,9 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * Debug screen: live camera + tracked landmarks / motion line + running stats, plus a switch
- * to compare the HAND and MOTION engines. Runs the pipeline in the foreground (no service,
- * no accessibility) so we can see exactly what is detected.
+ * Debug screen: live camera + overlay + running stats, plus a 3-way selector to compare the
+ * HAND, MOTION and PINCH engines. Runs the pipeline in the foreground (no service, no
+ * accessibility) so we can see exactly what is detected and rehearse the gesture.
  */
 class PreviewActivity : AppCompatActivity() {
 
@@ -33,6 +34,7 @@ class PreviewActivity : AppCompatActivity() {
 
     private var handHelper: HandLandmarkerHelper? = null
     private var motionDetector: MotionDetector? = null
+    private var pinchDetector: PinchDetector? = null
     private lateinit var mode: AppPrefs.Mode
 
     private val vibrator: Vibrator? by lazy { getSystemService(Vibrator::class.java) }
@@ -43,45 +45,71 @@ class PreviewActivity : AppCompatActivity() {
     ) { granted -> if (granted) startCamera() else binding.stats.text = "Нет разрешения на камеру" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(AppPrefs.getNightMode(this))
+        AppCompatDelegate.setDefaultNightMode(AppPrefs.getNightMode(this))
         super.onCreate(savedInstanceState)
         binding = ActivityPreviewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         mode = AppPrefs.getMode(this)
-        binding.modeSwitch.isChecked = mode == AppPrefs.Mode.MOTION
-        updateModeLabel()
-        binding.modeSwitch.setOnCheckedChangeListener { _, checked ->
-            mode = if (checked) AppPrefs.Mode.MOTION else AppPrefs.Mode.HAND
+        checkModeButton(mode)
+        binding.modeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            mode = when (checkedId) {
+                R.id.btnModeMotion -> AppPrefs.Mode.MOTION
+                R.id.btnModePinch -> AppPrefs.Mode.PINCH
+                else -> AppPrefs.Mode.HAND
+            }
             AppPrefs.setMode(this, mode)
             motionDetector?.reset()
-            updateModeLabel()
+            pinchDetector?.reset()
         }
 
-        swipeDetector = SwipeDetector { direction ->
+        // Fired by both the swipe (hand/motion) and pinch detectors.
+        val onAction: (SwipeDetector.Direction) -> Unit = { direction ->
             lastSwipeText = if (direction == SwipeDetector.Direction.UP) "▲ ВВЕРХ" else "▼ ВНИЗ"
             runOnUiThread {
                 vibrator?.vibrate(VibrationEffect.createOneShot(35, VibrationEffect.DEFAULT_AMPLITUDE))
             }
         }
+        swipeDetector = SwipeDetector { onAction(it) }
+        pinchDetector = PinchDetector { onAction(it) }
 
         handHelper = HandLandmarkerHelper(this) { result ->
-            if (mode == AppPrefs.Mode.HAND) {
-                val hand = result.landmarks
-                val palmY = hand?.getOrNull(HandLandmarkerHelper.PALM_LANDMARK)?.y()
-                swipeDetector.onFrame(palmY)
-                runOnUiThread {
-                    binding.overlay.setResults(hand, result.imageWidth, result.imageHeight)
-                    binding.stats.text = buildString {
-                        append("Режим: РУКА\n")
-                        append(if (handHelper?.isReady == true) "MediaPipe: готов\n" else "MediaPipe: НЕ готов\n")
-                        append("Кадров: ${handHelper?.framesProcessed ?: 0}\n")
-                        append("Рука: ${if (hand != null) "ДА (${hand.size})" else "нет"}\n")
-                        append("Palm Y: ${palmY?.let { "%.2f".format(it) } ?: "—"}\n")
-                        append("Свайп: $lastSwipeText")
-                        handHelper?.initError?.let { append("\nОшибка: $it") }
+            val hand = result.landmarks
+            when (mode) {
+                AppPrefs.Mode.HAND -> {
+                    val palmY = hand?.getOrNull(HandLandmarkerHelper.PALM_LANDMARK)?.y()
+                    swipeDetector.onFrame(palmY)
+                    runOnUiThread {
+                        binding.overlay.setResults(hand, result.imageWidth, result.imageHeight)
+                        binding.stats.text = buildString {
+                            append("Режим: РУКА\n")
+                            append(if (handHelper?.isReady == true) "MediaPipe: готов\n" else "MediaPipe: НЕ готов\n")
+                            append("Кадров: ${handHelper?.framesProcessed ?: 0}\n")
+                            append("Рука: ${if (hand != null) "ДА (${hand.size})" else "нет"}\n")
+                            append("Palm Y: ${palmY?.let { "%.2f".format(it) } ?: "—"}\n")
+                            append("Свайп: $lastSwipeText")
+                            handHelper?.initError?.let { append("\nОшибка: $it") }
+                        }
                     }
                 }
+                AppPrefs.Mode.PINCH -> {
+                    pinchDetector?.onFrame(hand)
+                    runOnUiThread {
+                        binding.overlay.setResults(hand, result.imageWidth, result.imageHeight)
+                        val pd = pinchDetector
+                        binding.stats.text = buildString {
+                            append("Режим: ЩИПОК\n")
+                            append("Кадров: ${handHelper?.framesProcessed ?: 0}\n")
+                            append("Рука: ${if (hand != null) "ДА" else "нет"}\n")
+                            append("Зазор: ${pd?.let { "%.2f".format(it.lastDistance) } ?: "—"}\n")
+                            append("Сжато: ${if (pd?.isPinched == true) "ДА ✊" else "нет ✋"}\n")
+                            append("1 щипок = вниз · 2 = вверх\n")
+                            append("Действие: $lastSwipeText")
+                        }
+                    }
+                }
+                AppPrefs.Mode.MOTION -> { /* handled by motionDetector */ }
             }
         }
 
@@ -124,15 +152,18 @@ class PreviewActivity : AppCompatActivity() {
         }
     }
 
+    private fun checkModeButton(m: AppPrefs.Mode) {
+        val id = when (m) {
+            AppPrefs.Mode.MOTION -> R.id.btnModeMotion
+            AppPrefs.Mode.PINCH -> R.id.btnModePinch
+            AppPrefs.Mode.HAND -> R.id.btnModeHand
+        }
+        binding.modeGroup.check(id)
+    }
+
     private fun applySensitivity(sens: Int) {
         swipeDetector.minDelta = AppPrefs.minDelta(sens)
         motionDetector?.minMovingPixels = AppPrefs.minMovingPixels(sens)
-    }
-
-    private fun updateModeLabel() {
-        binding.modeSwitch.text =
-            if (mode == AppPrefs.Mode.MOTION) "Режим: Палец / движение (близко)"
-            else "Режим: Рука (30–40 см)"
     }
 
     private fun startCamera() {
@@ -162,7 +193,7 @@ class PreviewActivity : AppCompatActivity() {
                 .also {
                     it.setAnalyzer(cameraExecutor) { proxy ->
                         when (mode) {
-                            AppPrefs.Mode.HAND -> handHelper?.detect(proxy) ?: proxy.close()
+                            AppPrefs.Mode.HAND, AppPrefs.Mode.PINCH -> handHelper?.detect(proxy) ?: proxy.close()
                             AppPrefs.Mode.MOTION -> motionDetector?.detect(proxy) ?: proxy.close()
                         }
                     }

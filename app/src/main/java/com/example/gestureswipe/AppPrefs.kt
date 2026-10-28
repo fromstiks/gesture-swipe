@@ -28,7 +28,7 @@ object AppPrefs {
     /** 0..100; 50 == the current default tuning. */
     const val DEFAULT_SENSITIVITY = 50
 
-    enum class Mode { HAND, MOTION }
+    enum class Mode { HAND, MOTION, PINCH }
 
     fun getMode(context: Context): Mode {
         val name = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)

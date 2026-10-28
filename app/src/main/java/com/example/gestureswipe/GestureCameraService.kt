@@ -63,6 +63,7 @@ class GestureCameraService : LifecycleService() {
     private lateinit var swipeDetector: SwipeDetector
     private var handHelper: HandLandmarkerHelper? = null
     private var motionDetector: MotionDetector? = null
+    private var pinchDetector: PinchDetector? = null
     private lateinit var mode: AppPrefs.Mode
 
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -88,23 +89,7 @@ class GestureCameraService : LifecycleService() {
         startAsForeground()
         mode = AppPrefs.getMode(this)
 
-        swipeDetector = SwipeDetector { direction ->
-            mainHandler.post {
-                val a11y = SwipeAccessibilityService.instance
-                if (a11y == null) {
-                    Log.w(TAG, "Swipe detected but accessibility service is not enabled.")
-                    buzzLong() // long buzz = swipe service OFF
-                    setOverlayStatus("Свайп ВЫКЛ (вкл. службу)")
-                    return@post
-                }
-                buzz() // short buzz = dispatched
-                when (direction) {
-                    SwipeDetector.Direction.UP -> a11y.swipeUp()
-                    SwipeDetector.Direction.DOWN -> a11y.swipeDown()
-                }
-                setOverlayStatus(if (direction == SwipeDetector.Direction.UP) "▲ свайп вверх" else "▼ свайп вниз")
-            }
-        }
+        swipeDetector = SwipeDetector { direction -> performSwipe(direction) }
 
         setupEngines()
 
@@ -121,6 +106,25 @@ class GestureCameraService : LifecycleService() {
         isRunning = true
     }
 
+    /** Runs the actual swipe (or warns if the accessibility service is off). */
+    private fun performSwipe(direction: SwipeDetector.Direction) {
+        mainHandler.post {
+            val a11y = SwipeAccessibilityService.instance
+            if (a11y == null) {
+                Log.w(TAG, "Swipe detected but accessibility service is not enabled.")
+                buzzLong() // long buzz = swipe service OFF
+                setOverlayStatus("Свайп ВЫКЛ (вкл. службу)")
+                return@post
+            }
+            buzz() // short buzz = dispatched
+            when (direction) {
+                SwipeDetector.Direction.UP -> a11y.swipeUp()
+                SwipeDetector.Direction.DOWN -> a11y.swipeDown()
+            }
+            setOverlayStatus(if (direction == SwipeDetector.Direction.UP) "▲ свайп вверх" else "▼ свайп вниз")
+        }
+    }
+
     private fun setupEngines() {
         when (mode) {
             AppPrefs.Mode.HAND -> {
@@ -130,6 +134,15 @@ class GestureCameraService : LifecycleService() {
                     updateDetected(palmY != null, if (palmY != null) "✋ рука" else "нет руки")
                     overlayHand?.let { ov -> mainHandler.post { ov.setResults(hand, result.imageWidth, result.imageHeight) } }
                     swipeDetector.onFrame(palmY)
+                }
+            }
+            AppPrefs.Mode.PINCH -> {
+                pinchDetector = PinchDetector { direction -> performSwipe(direction) }
+                handHelper = HandLandmarkerHelper(this) { result ->
+                    val hand = result.landmarks
+                    updateDetected(hand != null, if (hand != null) "✋ щипок" else "нет руки")
+                    overlayHand?.let { ov -> mainHandler.post { ov.setResults(hand, result.imageWidth, result.imageHeight) } }
+                    pinchDetector?.onFrame(hand)
                 }
             }
             AppPrefs.Mode.MOTION -> {
@@ -180,8 +193,10 @@ class GestureCameraService : LifecycleService() {
                     if (paused) {
                         imageProxy.close()
                     } else when (mode) {
-                        AppPrefs.Mode.HAND -> handHelper?.detect(imageProxy) ?: imageProxy.close()
-                        AppPrefs.Mode.MOTION -> motionDetector?.detect(imageProxy) ?: imageProxy.close()
+                        AppPrefs.Mode.HAND, AppPrefs.Mode.PINCH ->
+                            handHelper?.detect(imageProxy) ?: imageProxy.close()
+                        AppPrefs.Mode.MOTION ->
+                            motionDetector?.detect(imageProxy) ?: imageProxy.close()
                     }
                 }
 

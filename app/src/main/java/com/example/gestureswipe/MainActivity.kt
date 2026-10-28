@@ -120,7 +120,11 @@ class MainActivity : AppCompatActivity() {
             getString(if (running) R.string.btn_stop else R.string.btn_start)
 
         val overlayOk = Settings.canDrawOverlays(this)
-        val modeName = if (AppPrefs.getMode(this) == AppPrefs.Mode.MOTION) "Палец / движение" else "Рука"
+        val modeName = when (AppPrefs.getMode(this)) {
+            AppPrefs.Mode.MOTION -> "Палец / движение"
+            AppPrefs.Mode.PINCH -> "Щипок (1=вниз, 2=вверх)"
+            AppPrefs.Mode.HAND -> "Рука"
+        }
         binding.modeInfo.text = buildString {
             append("Режим: $modeName (меняется в экране отладки)\n")
             append(if (overlayOk) "Окно поверх: разрешено" else "Окно поверх: нет (жми кнопку выше)")
