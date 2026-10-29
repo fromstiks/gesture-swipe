@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnOpenA11y.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
+        binding.btnAutoA11y.setOnClickListener { enableAccessibilityViaSecureSettings() }
         binding.btnBattery.setOnClickListener {
             startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         }
@@ -102,6 +103,36 @@ class MainActivity : AppCompatActivity() {
         checkScrollButton(mode)
         updateScrollDescription(mode)
         refreshStatus()
+    }
+
+    /**
+     * Enables our accessibility service directly. Works only after the owner has granted
+     * WRITE_SECURE_SETTINGS once over adb:
+     *   adb shell pm grant com.example.gestureswipe android.permission.WRITE_SECURE_SETTINGS
+     */
+    private fun enableAccessibilityViaSecureSettings() {
+        val granted = checkSelfPermission("android.permission.WRITE_SECURE_SETTINGS") ==
+            PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            android.widget.Toast.makeText(
+                this,
+                "Нет права. Выполни на ПК: adb shell pm grant $packageName android.permission.WRITE_SECURE_SETTINGS",
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+            return
+        }
+        val me = ComponentName(this, SwipeAccessibilityService::class.java).flattenToString()
+        val current = Settings.Secure.getString(
+            contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ).orEmpty()
+        if (!current.split(':').any { it.equals(me, ignoreCase = true) }) {
+            val updated = if (current.isEmpty()) me else "$current:$me"
+            Settings.Secure.putString(
+                contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES, updated
+            )
+        }
+        Settings.Secure.putInt(contentResolver, Settings.Secure.ACCESSIBILITY_ENABLED, 1)
+        binding.root.postDelayed({ refreshStatus() }, 500)
     }
 
     private fun checkScrollButton(mode: AppPrefs.Mode) {

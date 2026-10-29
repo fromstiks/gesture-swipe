@@ -198,6 +198,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Открыть спец. возможности" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAutoA11y"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="Включить службу автоматически (ADB)" />
             <TextView
                 style="@style/HelpText"
                 android:layout_width="match_parent"
