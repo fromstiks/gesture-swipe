@@ -47,6 +47,15 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
+    <!-- Title of one step inside the setup accordion. -->
+    <style name="StepTitle">
+        <item name="android:textColor">@color/on_surface</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">6dp</item>
+    </style>
+
     <!-- Small grey helper/comment text. -->
     <style name="HelpText">
         <item name="android:textColor">@color/on_surface_var</item>

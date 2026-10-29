@@ -47,9 +47,38 @@ class MainActivity : AppCompatActivity() {
                 if (open) "⚙️  Первичная настройка   ▾" else "⚙️  Первичная настройка   ▴"
         }
 
+        // Scroll type selector.
+        checkScrollButton(AppPrefs.getMode(this))
+        updateScrollDescription(AppPrefs.getMode(this))
+        binding.scrollTypeGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val newMode = when (checkedId) {
+                R.id.btnScrollMotion -> AppPrefs.Mode.MOTION
+                R.id.btnScrollPinch -> AppPrefs.Mode.PINCH
+                else -> AppPrefs.Mode.HAND
+            }
+            if (newMode != AppPrefs.getMode(this)) {
+                AppPrefs.setMode(this, newMode)
+                updateScrollDescription(newMode)
+                restartServiceIfRunning()
+                refreshStatus()
+            }
+        }
+
         binding.btnGrantCamera.setOnClickListener { requestPermissions() }
+        binding.btnAppInfo.setOnClickListener {
+            startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    android.net.Uri.parse("package:$packageName")
+                )
+            )
+        }
         binding.btnOpenA11y.setOnClickListener {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+        }
+        binding.btnBattery.setOnClickListener {
+            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
         }
         binding.btnToggleService.setOnClickListener { toggleService() }
         binding.btnPreview.setOnClickListener {
@@ -69,7 +98,44 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val mode = AppPrefs.getMode(this)
+        checkScrollButton(mode)
+        updateScrollDescription(mode)
         refreshStatus()
+    }
+
+    private fun checkScrollButton(mode: AppPrefs.Mode) {
+        binding.scrollTypeGroup.check(
+            when (mode) {
+                AppPrefs.Mode.MOTION -> R.id.btnScrollMotion
+                AppPrefs.Mode.PINCH -> R.id.btnScrollPinch
+                AppPrefs.Mode.HAND -> R.id.btnScrollHand
+            }
+        )
+    }
+
+    private fun updateScrollDescription(mode: AppPrefs.Mode) {
+        binding.scrollDesc.text = when (mode) {
+            AppPrefs.Mode.HAND ->
+                "Взмах рукой. Держи раскрытую ладонь в 30–40 см от камеры (вся кисть в кадре) и проведи ею вверх или вниз — лента пролистнётся."
+            AppPrefs.Mode.MOTION ->
+                "Движение пальцем. Проведи пальцем вверх или вниз прямо у камеры — ловит любое движение, работает вблизи."
+            AppPrefs.Mode.PINCH ->
+                "Щипок. Сведи большой и указательный пальцы: один щипок — свайп вниз, два быстрых подряд — свайп вверх. Кисть целиком в кадре."
+        }
+    }
+
+    /** The service reads the mode at start, so a running service is restarted to apply it. */
+    private fun restartServiceIfRunning() {
+        if (!GestureCameraService.isRunning) return
+        stopService(Intent(this, GestureCameraService::class.java))
+        binding.root.postDelayed({
+            ContextCompat.startForegroundService(
+                this,
+                Intent(this, GestureCameraService::class.java)
+            )
+            binding.root.postDelayed({ refreshStatus() }, 400)
+        }, 600)
     }
 
     private fun toggleTheme() {
@@ -126,7 +192,7 @@ class MainActivity : AppCompatActivity() {
             AppPrefs.Mode.HAND -> "Рука"
         }
         binding.modeInfo.text = buildString {
-            append("Режим: $modeName (меняется в экране отладки)\n")
+            append("Тип скролла: $modeName\n")
             append(if (overlayOk) "Окно поверх: разрешено" else "Окно поверх: нет (жми кнопку выше)")
         }
         binding.btnOverlay.isEnabled = !overlayOk

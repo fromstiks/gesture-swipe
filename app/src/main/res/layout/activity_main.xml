@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -69,7 +70,63 @@
             android:textSize="14sp"
             android:text="Распознавание" />
 
-        <!-- Setup accordion header -->
+        <!-- ===== Scroll type ===== -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="12dp"
+            android:paddingBottom="8dp"
+            android:text="🎯  Тип скролла"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/scrollTypeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true"
+            app:selectionRequired="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScrollHand"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minWidth="0dp"
+                android:text="Рука" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScrollMotion"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minWidth="0dp"
+                android:text="Палец" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnScrollPinch"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minWidth="0dp"
+                android:text="Щипок" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <TextView
+            android:id="@+id/scrollDesc"
+            style="@style/HelpText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:textSize="12sp"
+            android:text="…" />
+
+        <!-- ===== Setup accordion ===== -->
         <TextView
             android:id="@+id/setupHeader"
             style="@style/AccordionHeader"
@@ -77,7 +134,6 @@
             android:layout_height="wrap_content"
             android:text="⚙️  Первичная настройка   ▾" />
 
-        <!-- Setup accordion content (collapsed by default) -->
         <LinearLayout
             android:id="@+id/setupContent"
             android:layout_width="match_parent"
@@ -86,48 +142,106 @@
             android:visibility="gone"
             android:paddingTop="8dp">
 
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Делается один раз. Иди строго по порядку — шаг 2 нужен, чтобы заработал шаг 3." />
+
+            <!-- Step 1 -->
+            <TextView
+                style="@style/StepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шаг 1 · Камера" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGrantCamera"
                 style="@style/NeuButton.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1 · Дать доступ к камере" />
-
-            <!-- comment / instruction -->
+                android:text="Дать доступ к камере" />
             <TextView
                 style="@style/HelpText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="4dp"
-                android:text="Разреши доступ к камере (и уведомления на Android 13+)." />
+                android:text="В системном окне нажми «Разрешить» (и уведомления на Android 13+)." />
 
+            <!-- Step 2 -->
+            <TextView
+                style="@style/StepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шаг 2 · Разрешить ограниченные настройки" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAppInfo"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Открыть «О приложении»" />
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:text="Android блокирует спец. возможности у приложений не из Play Маркета. Снять блок:\n1. Зажми иконку GestureSwipe на рабочем столе.\n2. Нажми «О приложении» (значок ⓘ).\n3. Справа вверху нажми ⋮ (три точки).\n4. Выбери «Разрешить ограниченные настройки» (подтверди PIN/отпечатком).\n\nНет такого пункта? Сначала нажми «Включить службу» в шаге 3 — появится заглушка «ограниченный доступ» — закрой её и вернись сюда." />
+
+            <!-- Step 3 -->
+            <TextView
+                style="@style/StepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шаг 3 · Включить службу свайпов" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOpenA11y"
                 style="@style/NeuButton.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2 · Включить службу свайпов" />
-
+                android:text="Открыть спец. возможности" />
             <TextView
                 style="@style/HelpText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="4dp"
-                android:text="Если пишет «ограниченный доступ»:\nНастройки → Приложения → Управление приложениями → GestureSwipe → ⋮ (три точки вверху справа) → «Разрешить ограниченные настройки».\nПотом Настройки → Спец. возможности → GestureSwipe → включить тумблер." />
+                android:text="Спец. возможности → Установленные приложения → GestureSwipe → включи тумблер и нажми «Разрешить». Вверху экрана статус должен стать «✓ Служба свайпов — включена»." />
 
+            <!-- Step 4 -->
+            <TextView
+                style="@style/StepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шаг 4 · Окно поверх TikTok" />
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnOverlay"
                 style="@style/NeuButton.Small"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3 · Окно поверх TikTok" />
-
+                android:text="Разрешить окно поверх" />
             <TextView
                 style="@style/HelpText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="4dp"
-                android:text="Разреши показ поверх других приложений — чтобы видеть мини-превью камеры в TikTok." />
+                android:text="Включи тумблер «Показ поверх других приложений» — появится мини-превью камеры, чтобы видеть, куда держать руку." />
+
+            <!-- Step 5 -->
+            <TextView
+                style="@style/StepTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Шаг 5 · Работа в фоне (OnePlus/Xiaomi)" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnBattery"
+                style="@style/NeuButton.Small"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Настройки батареи" />
+            <TextView
+                style="@style/HelpText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="4dp"
+                android:text="Найди GestureSwipe и поставь «Не оптимизировать» / «Без ограничений». Ещё: в списке недавних приложений нажми на карточку GestureSwipe и «залочь» её (замочек) — иначе система выключит камеру в фоне." />
         </LinearLayout>
 
         <!-- Primary action -->
